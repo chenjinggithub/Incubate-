@@ -1,0 +1,158 @@
+
+int[] ra = {
+  399,649,416,517,411,440,329,430,579,
+  206,128,120,143,145,103,46,45,20,31,25,11,18,27,29,39,35,84,65,
+  116,82,102,147,99,114,118,135,128,106,98,86,
+  93,78,73,55,75,66,86,92,56,64,113,115,99,49,52,27,31,
+  21,36,13,37,15,9,13,14,3,6,22,4,12,
+  3,5,7,4,2,3,6,1,14
+};
+Data[] data = new Data[ra.length];
+
+float R = 500.0;
+float o ,theta;
+float x,y;
+float spring =0.05;
+
+Ring ring;
+ 
+void setup(){
+  size(1920,1080);
+  
+      //float Distance = dist(x,y,width/2, height/2);
+  for(int m =0; m<ra.length;m++){
+    o = random(0,R-ra[m]);
+    theta = random(0,2*PI);
+    //data[m]= new Data (o*cos(theta),o*sin(theta),ra[m]/6,m ,data);
+    data[m]= new Data (o*cos(theta)+width/2,o*sin(theta)+height/2,ra[m]/8,m ,data);
+}
+  ring = new Ring(R);
+
+
+}  
+
+void draw(){
+  
+  background(0);
+  for(Data data : data){
+    data.collide();
+    data.move();
+    data.display();
+  }
+  
+  ring.display(R);
+  saveFrame("output/frames####.png");
+}
+
+
+
+
+
+
+
+class Data{
+  
+  int id;
+  Data[] others;
+  float x,y;
+  float vx=random(0,0.1);
+  float vy=random(0,0.1);
+  float friction = -0.9;
+
+  float r;
+
+
+  
+  Data(float xin, float yin, float din,int idin, Data[] oin){
+    x=xin;
+    y=yin;
+    r=din;
+    id =idin;
+    others = oin;
+
+    
+
+  }
+    
+  
+  void collide(){
+
+    for (int i = id+1; i< ra.length; i++){
+      float dx =others[i].x -x;
+      float dy = others[i].y - y; 
+      
+      float distance = sqrt(dx*dx + dy*dy);
+      float minDist = others[i].r/2+r/2;
+      
+      if (distance < minDist){       
+        float angle = atan2(dy, dx);
+        float targetX = x + cos(angle) * minDist;
+        float targetY = y + sin(angle) * minDist;
+        float ax = (targetX - others[i].x) * spring;
+        float ay = (targetY - others[i].y) * spring;
+        vx -= ax;
+        vy -= ay;
+        others[i].vx += ax;
+        others[i].vy += ay;       
+      } 
+    }
+  
+      }
+  
+  
+  
+  
+  
+  
+  void move(){
+    x += vx;
+    y += vy;
+    o = dist(width/2,height/2, x,y);
+    theta=atan2(y,x);
+    if (o>=(R-r)){
+       o=R-r;
+       vx *= friction;
+       vy *= friction;
+
+  
+
+
+    }
+ 
+   
+ 
+  }
+  
+  void display (){
+        //translate(width/2,height/2);
+    noStroke();
+    fill(255,200);
+
+    ellipse(x,y, r*2,r*2);
+  }
+  
+  
+}
+
+
+
+
+
+
+
+class Ring {
+  float R = 500.0;
+  
+  Ring(float RRin){
+    R = RRin;
+  
+  }
+  
+  void display(float R){
+  strokeWeight(2);
+  stroke(255,120);
+  noFill();
+  ellipse(width/2, height/2, R*2,R*2);
+  }
+
+}
